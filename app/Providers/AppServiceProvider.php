@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\GeneralSettings;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,5 +28,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //
+        Schema::defaultStringLength(191);
+
+        $data['basic'] =  GeneralSettings::first();
+        $data['gnl'] =  GeneralSettings::first();
+        $data['time'] = Carbon::now();
+        View::share($data);
     }
 }
