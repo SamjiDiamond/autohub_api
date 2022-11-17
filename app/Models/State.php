@@ -8,4 +8,8 @@ class State extends Model
 {
     protected $table = 'states';
     protected $guarded=[];
+
+    public function lgas(){
+        return $this->hasMany(Lga::class,'state_id', 'id');
+    }
 }
