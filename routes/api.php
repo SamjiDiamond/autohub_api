@@ -23,9 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Front pages
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/home', 'index');
-    Route::get('/product-details/{id}', 'productDetails');
-    Route::get('/forgot-password', 'forgotPassword');
-    Route::get('/reset-password', 'resetPassword');
+    Route::get('/product-details/{slug}', 'productDetails');
+    Route::get('/product-options', 'options');
+    // Route::get('/reset-password', 'resetPassword');
 });
 
 // Auth pages

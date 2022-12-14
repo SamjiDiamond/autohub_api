@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\VFDTestPaymentNotice;
 use App\Models\GeneralSettings;
 use App\Models\Brand;
 use App\Models\HomeSlider;
 use App\Models\State;
 use App\Models\Category;
+use App\Models\Product;
 // use App\Models\GeneralSettings;
 use App\Models\User;
 use Livewire\Component;
 use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class FrontendController extends Controller
@@ -19,14 +20,39 @@ class FrontendController extends Controller
 
     // Home Functions Starts Here
     public function index(){
-        $data['sliders'] = HomeSlider::all();
+        $data['sliders'] = HomeSlider::where('status',1)->get();
         $data['category'] = Category::where('status',1)->get();
         $data['brands'] = Brand::where('status',1)->get();
-        $data['location'] = State::with('lgas')->get();
-        $data['featured'] = [];
-        $data['newly_added'] = [];
-        $data['everything'] = [];
-        $data['exhautic'] = [];
+        $data['location'] = State::select('id','name','status')->with('lgas')->get();
+        $data['featured'] = Product::where(['featured'=>1,'status'=>'active'])->latest()->get();
+        $data['exhautic'] = Product::where(['exhautic'=>1,'status'=>'active'])->latest()->get();
+        $data['newly_added'] = Product::where(['status'=>'active'])->latest()->take(10)->get();
+        $data['everything'] = Product::where(['status'=>'active'])->latest()->paginate(20);
+
+        // Log::notice("Home data fetched from API ".json_encode($data));
+
+        return response()->json(['success' => true, 'data' => $data], 200);
+    }
+
+    public function productDetails($slug){
+        $data['details'] = Product::where(['slug'=>$slug,'status'=>'active'])->with('user')->first();
+        $data['blog_post'] = [];
+
+        // Log::notice("Home data fetched from API ".json_encode($data));
+
+        return response()->json(['success' => true, 'data' => $data], 200);
+    }
+
+    public function options(){
+        $data['condition'] = ['New','Toks','Used'];
+        $data['body_type'] = ['Saloon','Sedan','Hatchback'];
+        $data['fuel_type'] = ['Petrol','Diesel','hybrid'];
+        $data['drive_train'] = ['All Wheel','Front Wheel'];
+        $data['engine_size'] = ['3500 cc'];
+        $data['car_features'] = ['Alloy Wheels','AM/FM Radio','CD Player','Air Conditioning','DVD Player'];
+        $data['cylinder'] = [1.2,1.5,2,4,6,8,12];
+        $data['seat'] = [1,2,3,4,5,6,7,8,12,14,18,21];
+        $data['color'] = ['White','Black','Green','Red','Blue','Yellow','Brown','Tan','Grey','Maroon','Orange','Purple','Gold','Silver','Burgandy'];
 
         return response()->json(['success' => true, 'data' => $data], 200);
     }
@@ -40,88 +66,5 @@ class FrontendController extends Controller
     public function notice(){
         $data['page_title'] = "Terms and Conditions";
         return view('notice', $data);
-    }
-
-    public function sendNotice(Request $request){
-        $request->validate([
-            'bank' => 'required|string',
-            'accountNo' => 'required|numeric',
-            'amount' => 'required|numeric',
-            'naration' => 'required|string',
-            'pin' => 'required|numeric',
-        //
-        ], [
-            'image.required' => 'Select Image to upload',
-            'image.mimes' => 'Only jpeg,jpg,png,bmp Image supported',
-        ]);
-
-        if($request->bank != "vfd"){
-            return back()->with(['error'=>"Only VFD Bank is Available for test payment at the moment"]);
-        }
-
-        $pin = substr($request->accountNo, -4);
-
-        if($request->pin != $pin){
-            return back()->with(['error'=>"Incorrect Pin Provided"]);
-        }
-
-        // check if account exist
-        $acc = User::where('account_two',$request->accountNo)->first();
-        if(!$acc){
-            return back()->with(['error'=>"Account does not exist on XtraPay"]);
-        }
-
-        // VFDTestPaymentNotice::dispatch($request->amount,$request->accountNo,$request->naration);
-
-        $ref = "Vfd-x-" . rand();
-        $sessionId = "0000".$pin.Carbon::now()->format('YmdHi');
-
-        // $payload = '{
-        //     "reference": "' . $ref . '",
-        //     "amount": "' . $request->amount . '",
-        //     "account_number": "' . $request->accountNo . '",
-        //     "originator_account_number": "0000001234",
-        //     "originator_account_name": "XtraPay",
-        //     "originator_bank": "999999",
-        //     "originator_narration": "' . $request->naration . '",
-        //     "timestamp": "' . Carbon::now() . '",
-        //     "sessionId": "' . $sessionId . '"
-        //   }';
-
-          $payload['reference'] = $ref;
-          $payload['amount'] = $request->amount;
-          $payload['account_number'] = $request->accountNo;
-          $payload['originator_account_number'] = "0000001234";
-          $payload['originator_account_name'] = "XtraPay";
-          $payload['originator_bank'] = "999999";
-          $payload['originator_narration'] = $request->naration;
-          $payload['timestamp'] = Carbon::now();
-          $payload['sessionId'] = $sessionId;
-
-          $data = json_encode($payload);
-
-        $curl = curl_init();
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://xtrapay.techplushost.com/api/vfd-vaccount-webhook',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => $data,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json'
-            ),
-        ));
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-
-        return back()->with(['status'=>"Test Payment Sent to your Account Successfully"]);
     }
 }
