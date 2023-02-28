@@ -41,3 +41,5 @@ Route::controller(AuthController::class)->group(function () {
 Route::controller(DashboardController::class)->group(function () {
     Route::post('/dashboard', 'dashboard');
 });
+
+include __DIR__ .'/app.php';
