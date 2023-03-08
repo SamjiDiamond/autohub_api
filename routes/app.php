@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\App\AdController;
 use App\Http\Controllers\Api\App\AuthenticationController;
+use App\Http\Controllers\Api\App\MessageController;
 use App\Http\Controllers\Api\App\StoreController;
 use App\Http\Controllers\Api\App\SwapController;
 use App\Http\Controllers\Api\App\UserController;
@@ -29,10 +30,13 @@ Route::prefix("app")->group(function () {
     Route::post('/forgot-password', [AuthenticationController::class, 'login']);
     Route::put('/reset-password', [AuthenticationController::class, 'login']);
 
-    Route::middleware('auth:sanctum')->group(function(){
+
         Route::prefix('ad')->group(function () {
-            Route::post('create', [AdController::class, 'create']);
-            Route::get('list', [AdController::class, 'list']);
+            Route::middleware('auth:sanctum')->group(function() {
+                Route::post('create', [AdController::class, 'create']);
+                Route::get('list', [AdController::class, 'list']);
+            });
+
             Route::get('list/state', [AdController::class, 'stateList']);
             Route::get('list/maker', [AdController::class, 'makerList']);
             Route::get('list/condition', [AdController::class, 'conditionList']);
@@ -58,12 +62,14 @@ Route::prefix("app")->group(function () {
 
         Route::apiResource('watchlist', \App\Http\Controllers\Api\App\WatchListController::class);
 
+        Route::apiResource('message', MessageController::class);
+
+        Route::get('product-message/{id}', [MessageController::class, 'showProduct']);
+
         Route::get('profile', [UserController::class, 'profile']);
         Route::post('profile', [UserController::class, 'updateProfile']);
         Route::post('update-avatar', [UserController::class, 'updateAvatar']);
         Route::post('change-password', [UserController::class, 'changePassword']);
-
-    });
 
 });
 
