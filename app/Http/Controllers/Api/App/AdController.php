@@ -79,6 +79,13 @@ class AdController extends Controller
         return response()->json(['success' => 1, 'message' => 'Fetched successfully', 'data'=>$data]);
     }
 
+    function sponsored(){
+
+        $data=Product::where(["status" => 'active', 'featured' => 1])->inRandomOrder()->limit(20)->get();
+
+        return response()->json(['success' => 1, 'message' => 'Fetched successfully', 'data'=>$data]);
+    }
+
     function stateList(){
 
         $data=State::where("status", 1)->get();

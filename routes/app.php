@@ -31,11 +31,14 @@ Route::prefix("app")->group(function () {
     Route::post('/forgot-password', [AuthenticationController::class, 'login']);
     Route::put('/reset-password', [AuthenticationController::class, 'login']);
 
+    Route::get('sliders', [SliderController::class, 'index']);
+
 
         Route::prefix('ad')->group(function () {
             Route::middleware('auth:sanctum')->group(function() {
                 Route::post('create', [AdController::class, 'create']);
                 Route::get('list', [AdController::class, 'list']);
+                Route::get('sponsored', [AdController::class, 'sponsored']);
             });
 
             Route::get('list/state', [AdController::class, 'stateList']);
@@ -71,8 +74,6 @@ Route::prefix("app")->group(function () {
         Route::post('profile', [UserController::class, 'updateProfile']);
         Route::post('update-avatar', [UserController::class, 'updateAvatar']);
         Route::post('change-password', [UserController::class, 'changePassword']);
-
-        Route::get('sliders', [SliderController::class, 'index']);
 
 });
 

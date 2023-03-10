@@ -29,6 +29,20 @@ Route::middleware([
     })->name('dashboard');
 });
 
+Route::get('/category/{filename}', function ($filename) {
+    $path = storage_path('app/public/category/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+    return $response;
+})->name('show.category');
+
 Route::get('/sliders/{filename}', function ($filename) {
     $path = storage_path('app/public/sliders/' . $filename);
 
