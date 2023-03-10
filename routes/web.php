@@ -29,6 +29,21 @@ Route::middleware([
     })->name('dashboard');
 });
 
+Route::get('/sliders/{filename}', function ($filename) {
+    $path = storage_path('app/public/sliders/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+    return $response;
+})->name('show.sliders');
+
+
 
 // All Admin Routes Starts Here
 Route::get('control/login', [AdminAuthController::class, 'getLogin'])->name('adminLogin');

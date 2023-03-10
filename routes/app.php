@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\App\AdController;
 use App\Http\Controllers\Api\App\AuthenticationController;
 use App\Http\Controllers\Api\App\MessageController;
+use App\Http\Controllers\Api\App\SliderController;
 use App\Http\Controllers\Api\App\StoreController;
 use App\Http\Controllers\Api\App\SwapController;
 use App\Http\Controllers\Api\App\UserController;
@@ -70,6 +71,8 @@ Route::prefix("app")->group(function () {
         Route::post('profile', [UserController::class, 'updateProfile']);
         Route::post('update-avatar', [UserController::class, 'updateAvatar']);
         Route::post('change-password', [UserController::class, 'changePassword']);
+
+        Route::get('sliders', [SliderController::class, 'index']);
 
 });
 
