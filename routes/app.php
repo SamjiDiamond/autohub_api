@@ -35,10 +35,11 @@ Route::prefix("app")->group(function () {
 
 
         Route::prefix('ad')->group(function () {
+            Route::get('list', [AdController::class, 'list']);
+            Route::get('sponsored', [AdController::class, 'sponsored']);
+
             Route::middleware('auth:sanctum')->group(function() {
                 Route::post('create', [AdController::class, 'create']);
-                Route::get('list', [AdController::class, 'list']);
-                Route::get('sponsored', [AdController::class, 'sponsored']);
             });
 
             Route::get('list/state', [AdController::class, 'stateList']);
